@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kemi's Kitchen & Delivery: Support Assistant (Demo)</title>
+<style>
+:root{--g:#0b7a4b;--g2:#0e9a5f;--o:#f59e0b;--bg:#f4f1ea;--ink:#1f2937;--mut:#6b7280;--card:#fff}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column}
+.page{flex:1;display:grid;grid-template-columns:1fr 420px;gap:32px;max-width:1100px;margin:0 auto;padding:32px 20px;align-items:start}
+.hero h1{font-size:2.2rem;margin:.2em 0;color:var(--g)}
+.hero .tag{display:inline-block;background:#fff3d6;color:#92400e;padding:4px 10px;border-radius:99px;font-size:.8rem;font-weight:600}
+.hero ul{line-height:1.8;padding-left:1.2em}
+.hero .note{font-size:.85rem;color:var(--mut)}
+.chat{background:var(--card);border-radius:20px;box-shadow:0 20px 50px rgba(0,0,0,.12);display:flex;flex-direction:column;height:640px;overflow:hidden}
+.head{background:linear-gradient(135deg,var(--g),var(--g2));color:#fff;padding:14px 16px;display:flex;align-items:center;gap:12px}
+.logo{width:42px;height:42px;border-radius:50%;background:var(--o);display:grid;place-items:center;font-weight:800;font-size:1.1rem;color:#fff}
+.head .t{flex:1}.head b{display:block}.head small{opacity:.85}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#7CFFB2;margin-right:5px}
+.icon{background:rgba(255,255,255,.18);border:0;color:#fff;border-radius:10px;padding:6px 10px;cursor:pointer;font-size:.8rem}
+#log{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;background:#fbfaf7}
+.m{max-width:85%;padding:10px 13px;border-radius:16px;line-height:1.45;font-size:.93rem;white-space:pre-line;animation:in .2s ease}
+@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1}}
+.bot{background:#fff;border:1px solid #ece7dc;align-self:flex-start;border-bottom-left-radius:4px}
+.user{background:var(--g);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.typing{display:flex;gap:4px;padding:12px 14px}
+.typing span{width:7px;height:7px;background:#bbb;border-radius:50%;animation:b 1s infinite}
+.typing span:nth-child(2){animation-delay:.15s}.typing span:nth-child(3){animation-delay:.3s}
+@keyframes b{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+.chips{display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px;border-top:1px solid #eee;background:#fff}
+.chip{border:1px solid var(--g);color:var(--g);background:#fff;border-radius:99px;padding:5px 11px;font-size:.8rem;cursor:pointer}
+.chip:hover{background:var(--g);color:#fff}
+form.in{display:flex;gap:8px;padding:10px 12px;background:#fff;border-top:1px solid #eee}
+form.in input{flex:1;border:1px solid #ddd;border-radius:99px;padding:10px 14px;font-size:.95rem;outline:none}
+form.in input:focus{border-color:var(--g)}
+form.in button{background:var(--o);border:0;color:#fff;border-radius:99px;padding:0 16px;font-weight:700;cursor:pointer}
+.ticket{background:#fff8e6;border:1px dashed var(--o);border-radius:12px;padding:10px 12px;font-size:.85rem;align-self:stretch;white-space:normal}
+.ticket h4{margin:0 0 6px;color:#92400e}
+.ticket td{padding:2px 8px 2px 0;vertical-align:top}
+.settings{display:none;padding:12px 16px;background:#f0faf5;border-bottom:1px solid #d5eee2;font-size:.82rem}
+.settings.open{display:block}
+.settings input{width:100%;padding:7px;margin:4px 0;border:1px solid #ccc;border-radius:8px;font-size:.82rem}
+.mode{font-size:.72rem;color:var(--mut);text-align:center;padding:4px;background:#fff}
+footer{text-align:center;padding:14px;font-size:.8rem;color:var(--mut)}
+footer b{color:var(--g)}
+@media(max-width:860px){.page{grid-template-columns:1fr;padding:0}.hero{padding:20px}.chat{height:100vh;height:100dvh;border-radius:0}.hero{order:2}}
+</style>
+</head>
+<body>
+<div class="page">
+  <section class="hero">
+    <span class="tag">Portfolio demo · Fictional business</span>
+    <h1>AI Customer Support for Nigerian SMEs</h1>
+    <p>Meet <b>Ada</b>, the 24/7 support assistant for <b>Kemi's Kitchen & Delivery</b>, a made-up Lagos food business. She answers questions, tracks orders and hands off to a human when needed.</p>
+    <ul>
+      <li>🍲 Menu, prices in naira and opening hours</li>
+      <li>🛵 Delivery zones across Lagos and Abuja</li>
+      <li>💳 Transfer, card and USSD payments, plus refunds</li>
+      <li>📦 Order tracking (try <b>KK-1042</b>, <b>KK-2087</b> or <b>KK-3155</b>)</li>
+      <li>🙋 Human handoff that creates a support ticket</li>
+      <li>🤖 Works offline. You can add an LLM key for AI answers based on the knowledge base</li>
+    </ul>
+    <p class="note">All names, orders, numbers and prices are fictional. No data leaves your browser in default mode.</p>
+  </section>
+
+  <div class="chat" role="region" aria-label="Support chat">
+    <div class="head">
+      <div class="logo">KK</div>
+      <div class="t"><b>Ada · Kemi's Kitchen</b><small><span class="dot"></span>Online · replies instantly</small></div>
+      <button class="icon" id="gear" title="Settings">⚙ AI mode</button>
+    </div>
+    <div class="settings" id="settings">
+      <b>Optional LLM mode</b> (OpenAI-compatible). Your key stays in memory only and is never saved.
+      <input id="apiBase" value="https://api.openai.com/v1" aria-label="API base URL">
+      <input id="apiKey" type="password" placeholder="sk-..." aria-label="API key">
+      <input id="apiModel" value="gpt-4o-mini" aria-label="Model">
+      <button class="chip" id="saveKey">Use LLM</button> <button class="chip" id="clearKey">Back to offline</button>
+    </div>
+    <div class="mode" id="mode">Offline mode · local knowledge base</div>
+    <div id="log" aria-live="polite"></div>
+    <div class="chips" id="chips"></div>
+    <form class="in" id="form"><input id="msg" autocomplete="off" placeholder="Type your message…" aria-label="Message"><button>Send</button></form>
+  </div>
+</div>
+<footer>Demo built by <b>Dinah Vertex Ltd</b> · AI consultancy, Abuja</footer>
+
+<script>
+// ---------------- Knowledge base ----------------
+const KB = [
+ {id:"greet", k:["hi","hello","hey","good morning","good afternoon","good evening","how far","wetin dey","howdy","sup","bawo","kedu","sannu"],
+  a:["How far! 👋 I'm Ada from Kemi's Kitchen. How I fit help you today?","Hello o! Welcome to Kemi's Kitchen 🍲 What can I do for you?"], chips:["See menu & prices","Track my order","Delivery areas"]},
+ {id:"howareyou", k:["how are you","how you dey","how body","you good"], a:["I dey kampe, thank you! 😄 Ready to help. Wetin you need?"]},
+ {id:"thanks", k:["thanks","thank you","thank u","tnx","appreciate","nice one","e se","daalu","na gode"], a:["You're welcome! 🙏 Anything else I can help with?"]},
+ {id:"bye", k:["bye","goodbye","see you","later","ok bye"], a:["Bye for now! Enjoy your meal 😋"]},
+ {id:"who", k:["who are you","are you a bot","are you human","your name","robot","ai"], a:["I'm Ada, Kemi's Kitchen's virtual assistant 🤖. I can answer most questions right away, and if you want to talk to a real person I can connect you to our team."], chips:["Talk to a human"]},
+ {id:"menu", k:["menu","price","prices","cost","how much","jollof","fried rice","egusi","pounded yam","amala","suya","small chops","food","dish","meal","eat"],
+  a:["Here's our popular menu 🍽️\n• Smoky Party Jollof + chicken: ₦4,500\n• Fried Rice + turkey: ₦5,200\n• Egusi + Pounded Yam: ₦4,800\n• Amala + Ewedu + Gbegiri: ₦4,000\n• Small Chops (20 pcs): ₦6,500\n• Beef Suya (large): ₦3,500\n• Zobo / Chapman (50cl): ₦1,200\nPrices include VAT. Delivery fee is separate."], chips:["Delivery fees","How do I order?","Payment options"]},
+ {id:"order", k:["how do i order","place order","place an order","make order","buy","want to order","order food","ordering"],
+  a:["Ordering is easy:\n1. Order on our website or WhatsApp (0800-000-KEMI, demo number)\n2. Choose delivery or pickup\n3. Pay by transfer, card or USSD\n4. You'll get an order ID like KK-1234 to track it here 🛵"], chips:["Payment options","Track my order"]},
+ {id:"delivery", k:["delivery","deliver","area","areas","location","zone","lekki","ikeja","yaba","surulere","ajah","vi","victoria island","ikoyi","abuja","wuse","maitama","garki","gwarinpa","delivery fee","ship","how long","time"],
+  a:["We deliver to these areas 🛵\nLagos: Lekki, Ajah, VI, Ikoyi, Yaba, Surulere, Ikeja, Maryland, Gbagada\nAbuja: Wuse, Maitama, Garki, Asokoro, Gwarinpa, Jabi\n\nFees: ₦1,500 (same zone) to ₦3,000 (cross-zone). FREE on orders above ₦25,000.\nUsual delivery time is 35 to 60 minutes, depending on traffic 😅"], chips:["Opening hours","Track my order"]},
+ {id:"payment", k:["pay","payment","transfer","card","ussd","bank","pos","cash","account number","paystack","verve","mastercard","visa"],
+  a:["You can pay with:\n💸 Bank transfer to Kemi's Kitchen Ltd, DemoBank 0123456789 (fictional)\n💳 Card (Verve, Visa, Mastercard) at checkout\n📱 USSD: dial *000*KEMI# (demo code)\n🚫 We don't take cash on delivery for orders above ₦20,000."], chips:["Refund policy"]},
+ {id:"refund", k:["refund","money back","cancel","cancellation","wrong order","complain","complaint","cold","late","missing","bad","reversal"],
+  a:["Sorry to hear something went wrong 😔 Our policy:\n• You can cancel for free within 5 minutes of ordering\n• For a wrong, missing or spoilt item, send a photo within 2 hours and we'll replace it or give a full refund\n• Refunds go back to your original payment method within 24 to 72 hours (transfer reversals can take up to 5 working days)\n\nDo you want me to connect you to a human agent?"], chips:["Talk to a human","Track my order"]},
+ {id:"hours", k:["open","opening","hours","close","closing","what time","sunday","weekend","public holiday"],
+  a:["Opening hours 🕘\nMon to Sat: 9:00am to 10:00pm\nSun: 12:00pm to 9:00pm\nPublic holidays: 12:00pm to 8:00pm\nThe last delivery order goes out 30 minutes before closing."]},
+ {id:"catering", k:["catering","event","party","wedding","owambe","bulk","office lunch"],
+  a:["Yes, we do catering for owambes, office lunches and parties 🎉 We need at least 48 hours' notice for 50+ guests. Want me to connect you to our events team?"], chips:["Talk to a human"]},
+ {id:"diet", k:["vegetarian","vegan","allergy","allergies","halal","spicy","pepper","gluten","nut"],
+  a:["We have vegetarian options (veggie jollof, beans & plantain). Our kitchen uses groundnut and crayfish, so please tell us about any allergies when you order. We can make most dishes mild on request 🌶️"]},
+ {id:"track", k:["track","status","where is my order","my order","order status","tracking","rider"], a:[null], chips:[]},
+ {id:"human", k:["human","agent","person","customer care","representative","call me","speak to","talk to","manager","support team"], a:[null]},
+];
+const ORDERS = {
+ "KK-1042":{s:"🛵 Out for delivery",d:"Rider Tunde is on the way to Lekki Phase 1. ETA about 15 minutes.",items:"2x Party Jollof, 1x Chapman"},
+ "KK-2087":{s:"👩🏾‍🍳 Being prepared",d:"Our kitchen is preparing your order. It should leave in about 20 minutes.",items:"Egusi + Pounded Yam, Small Chops"},
+ "KK-3155":{s:"✅ Delivered",d:"Delivered to Wuse 2, Abuja yesterday at 7:42pm.",items:"Beef Suya (large), Zobo"},
+ "KK-4410":{s:"⏳ Awaiting payment",d:"We haven't confirmed your transfer yet. Please send the receipt or try USSD.",items:"Fried Rice + turkey"}
+};
+const DEFAULT_CHIPS=["See menu & prices","Track my order","Delivery areas","Payment options","Refund policy","Talk to a human"];
+
+// ---------------- Matching ----------------
+const norm=s=>s.toLowerCase().replace(/[^a-z0-9₦\s-]/g," ").replace(/\s+/g," ").trim();
+function lev(a,b){if(Math.abs(a.length-b.length)>2)return 9;const d=[...Array(b.length+1).keys()];for(let i=1;i<=a.length;i++){let p=d[0];d[0]=i;for(let j=1;j<=b.length;j++){const t=d[j];d[j]=Math.min(d[j]+1,d[j-1]+1,p+(a[i-1]===b[j-1]?0:1));p=t}}return d[b.length]}
+function score(text,intent){
+  const t=" "+norm(text)+" ", words=norm(text).split(" ");let s=0;
+  for(const k of intent.k){
+    if(k.includes(" ")){ if(t.includes(" "+k+" ")||t.includes(k)) s+=3; }
+    else if(words.includes(k)) s+=2;
+    else if(k.length>=5 && words.some(w=>w.length>=4 && lev(w,k)<=(k.length>=7?2:1))) s+=1.5; // typo tolerance
+  }
+  return s;
+}
+function route(text){
+  let best=null,bs=0;for(const i of KB){const s=score(text,i);if(s>bs){bs=s;best=i}}
+  return bs>=1.5?best:null;
+}
+
+// ---------------- UI ----------------
+const log=document.getElementById("log"),chipsEl=document.getElementById("chips"),form=document.getElementById("form"),inp=document.getElementById("msg");
+let state={flow:null,ticket:{}}, llm=null, tickets=0;
+function add(text,who){const d=document.createElement("div");d.className="m "+who;d.textContent=text;log.appendChild(d);log.scrollTop=log.scrollHeight;return d}
+function setChips(list){chipsEl.innerHTML="";(list&&list.length?list:DEFAULT_CHIPS).forEach(c=>{const b=document.createElement("button");b.className="chip";b.type="button";b.textContent=c;b.onclick=()=>send(c);chipsEl.appendChild(b)})}
+function typing(){const d=document.createElement("div");d.className="m bot typing";d.innerHTML="<span></span><span></span><span></span>";log.appendChild(d);log.scrollTop=log.scrollHeight;return d}
+window.BOT_DELAY = 600;
+function botSay(text,chips){return new Promise(r=>{const t=typing();setTimeout(()=>{t.remove();add(text,"bot");setChips(chips);r()},window.BOT_DELAY)})}
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+
+async function send(text){
+  text=(text||"").trim();if(!text)return;add(text,"user");inp.value="";
+  const reply=await respond(text);
+  if(reply) await botSay(reply.text,reply.chips);
+  if(reply&&reply.ticket) showTicket(reply.ticket);
+}
+window.send=send;
+
+function respond(text){
+  const n=norm(text);
+  // handoff flow
+  if(state.flow==="h_name"){ if(n.length<2) return {text:"Please tell me your name 🙂"}; state.ticket.name=text.trim(); state.flow="h_phone"; return {text:`Thanks ${state.ticket.name.split(" ")[0]}! What's the best phone number to reach you on? (e.g. 0803 123 4567)`,chips:["Cancel"]}; }
+  if(state.flow==="h_phone"){ if(/cancel/.test(n)){state.flow=null;return {text:"No problem, I've cancelled the request. Anything else?"}}
+    const digits=text.replace(/\D/g,""); if(!/^(0[789][01]\d{8}|234[789][01]\d{8})$/.test(digits)) return {text:"Hmm, that doesn't look like a Nigerian mobile number. Please use a format like 0803 123 4567 or +234 803 123 4567.",chips:["Cancel"]};
+    state.ticket.phone=digits.startsWith("234")?"+"+digits:"+234"+digits.slice(1); state.flow="h_issue"; return {text:"Got it ✅ Briefly, what do you need help with?",chips:["Cancel"]}; }
+  if(state.flow==="h_issue"){ if(/^cancel$/.test(n)){state.flow=null;return {text:"Okay, I've cancelled it. Anything else?"}}
+    state.ticket.issue=text.trim(); state.flow=null; const tk={...state.ticket,id:"TKT-"+(5000+(++tickets)+Math.floor(Math.random()*900)),time:new Date().toLocaleString("en-NG")}; state.ticket={};
+    return {text:`All set! 🙌 I've created ticket ${tk.id}. Someone from our team will call ${tk.name.split(" ")[0]} on ${tk.phone} within 15 minutes during opening hours.`,ticket:tk}; }
+  if(state.flow==="track"){ const id=findOrder(text); if(id){state.flow=null;return orderReply(id)} if(/cancel|no|menu/.test(n)){state.flow=null;return {text:"Okay! Anything else?"}}
+    return {text:"I couldn't find that order ID 🤔 Order IDs look like KK-1042. Please check your SMS or WhatsApp confirmation and try again.",chips:["KK-1042","KK-2087","Talk to a human"]}; }
+  // order id anywhere
+  const oid=findOrder(text); if(oid) return orderReply(oid);
+  if(/KK-?\d+/i.test(text)) return {text:"I can't find that order ID in our system 🤔 Please check it, or I can connect you to a human.",chips:["Talk to a human"]};
+  if(llm) return askLLM(text);
+  const intent=route(text);
+  if(!intent) return {text:"Sorry, I no too understand that one 😅 I can help with our menu, delivery, payments, refunds, opening hours and order tracking. Or I can connect you to a human.",chips:DEFAULT_CHIPS};
+  if(intent.id==="track"){state.flow="track";return {text:"Sure! Please send your order ID (e.g. KK-1042) 📦",chips:["KK-1042","KK-2087","KK-3155"]}}
+  if(intent.id==="human"){state.flow="h_name";return {text:"No wahala, I'll connect you to a human agent 🙋🏾‍♀️ First, what's your name?",chips:["Cancel"]}}
+  return {text:pick(intent.a),chips:intent.chips};
+}
+function findOrder(t){const m=t.toUpperCase().match(/KK[-\s]?(\d{4})/);if(!m)return null;const id="KK-"+m[1];return ORDERS[id]?id:null}
+function orderReply(id){const o=ORDERS[id];return {text:`Order ${id}: ${o.s}\n${o.d}\nItems: ${o.items}`,chips:["Talk to a human","Refund policy"]}}
+function showTicket(t){const d=document.createElement("div");d.className="m ticket";d.id="ticket-"+t.id;
+  d.innerHTML=`<h4>🎫 Support ticket ${t.id}</h4><table><tr><td>Name</td><td></td></tr><tr><td>Phone</td><td></td></tr><tr><td>Issue</td><td></td></tr><tr><td>Created</td><td></td></tr><tr><td>Status</td><td>Queued for an agent</td></tr></table>`;
+  const c=d.querySelectorAll("td:nth-child(2)");c[0].textContent=t.name;c[1].textContent=t.phone;c[2].textContent=t.issue;c[3].textContent=t.time;
+  log.appendChild(d);log.scrollTop=log.scrollHeight}
+
+// ---------------- Optional LLM mode ----------------
+async function askLLM(text){
+  const kbText=KB.filter(i=>i.a[0]).map(i=>`[${i.id}] ${i.a.join(" / ")}`).join("\n")+"\nOrders: "+JSON.stringify(ORDERS);
+  try{
+    const r=await fetch(llm.base.replace(/\/$/,"")+"/chat/completions",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+llm.key},
+      body:JSON.stringify({model:llm.model,temperature:0.3,messages:[{role:"system",content:"You are Ada, the friendly support assistant for Kemi's Kitchen & Delivery (a fictional Lagos food business). Use a warm Nigerian tone with light Pidgin. Answer ONLY using the knowledge base below. If you don't know the answer, say so and offer a human agent (the user can type 'talk to a human'). Keep answers short.\n\nKNOWLEDGE BASE:\n"+kbText},{role:"user",content:text}]})});
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    const j=await r.json();return {text:j.choices[0].message.content.trim()};
+  }catch(e){const i=route(text);return {text:"(The AI service is unavailable, so I'm using offline answers.) "+(i&&i.a[0]?pick(i.a):"Please try asking another way, or type 'talk to a human'.")}}
+}
+document.getElementById("gear").onclick=()=>document.getElementById("settings").classList.toggle("open");
+document.getElementById("saveKey").onclick=()=>{const k=document.getElementById("apiKey").value.trim();if(!k)return;llm={key:k,base:document.getElementById("apiBase").value.trim(),model:document.getElementById("apiModel").value.trim()};document.getElementById("apiKey").value="";document.getElementById("mode").textContent="LLM mode · grounded in the knowledge base (key held in memory only)";};
+document.getElementById("clearKey").onclick=()=>{llm=null;document.getElementById("mode").textContent="Offline mode · local knowledge base"};
+
+form.onsubmit=e=>{e.preventDefault();send(inp.value)};
+botSay("Welcome to Kemi's Kitchen & Delivery! 🍲 I'm Ada. I can help with our menu, delivery, payments, refunds and order tracking. How I fit help you today?");
+</script>
+</body>
+</html>
